@@ -18,6 +18,11 @@ program
   .option("-d, --delay <ms>", "Delay between adds", 2000)
   .option("-c, --chunk <size>", "Chunk size for adding participants", 5);
 
+if (process.argv.length <= 2) {
+  program.outputHelp();
+  process.exit(0);
+}
+
 program.parse(process.argv);
 
 const options = program.opts();
