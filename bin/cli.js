@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
-import { WamateManager, readNumbers } from "../src/index.js";
+import { WamateManager, readNumbers } from "../src/functions.js";
 import { Command } from "commander";
-import chalk from "chalk";
+import ora from "ora";
+import { log } from "../src/logger.js";
+import { renderTitle } from "../src/title.js";
 
 const program = new Command();
 
@@ -24,68 +26,76 @@ if (process.argv.length <= 2) {
 }
 
 program.parse(process.argv);
-
 const options = program.opts();
 
 (async () => {
   try {
+    renderTitle();
+    log.info("🚀 Starting WaMate CLI...");
     const manager = new WamateManager("default");
     await manager.init();
 
     let groupId = options.group;
 
     if (!groupId.endsWith("@g.us")) {
-      console.log(chalk.yellow(`ℹ️ Resolving invite code: ${groupId}`));
+      const spinner = ora(`Resolving invite code: ${groupId}`).start();
       try {
         const info = await manager.client.getInviteInfo(groupId);
-        console.log(chalk.green(`✅ Found group: ${info.subject}`));
-        groupId = info.id._serialized; 
-        console.log(chalk.blue(`📌 Using Group ID: ${groupId}`));
+        groupId = info.id._serialized;
+        spinner.succeed(`✅ Found group: ${info.subject} (${groupId})`);
       } catch (err) {
-        console.error(
-          chalk.red("❌ Invalid invite code or unable to fetch group info")
-        );
+        spinner.fail(`❌ Invalid invite code or unable to fetch group info`);
         process.exit(1);
       }
     }
 
+    const spinnerGroup = ora(`Fetching group info: ${groupId}`).start();
     let group;
     try {
       group = await manager.client.getChatById(groupId);
+      spinnerGroup.succeed(`✅ Group loaded: ${group.name}`);
     } catch {
-      console.error(chalk.red(`❌ Cannot find group: ${groupId}`));
+      spinnerGroup.fail(`❌ Cannot find group: ${groupId}`);
       process.exit(1);
     }
 
+    log.info("📋 Preparing numbers...");
     let numbers = [];
 
-    if (options.numbers) {
-      numbers.push(...options.numbers);
+    if (options.numbers) numbers.push(...options.numbers);
+    if (options.file) {
+      const spinnerFile = ora(`Reading CSV file: ${options.file}`).start();
+      try {
+        const csvNumbers = await readNumbers(options.file);
+        numbers.push(...csvNumbers);
+        spinnerFile.succeed(`✅ CSV loaded (${csvNumbers.length} numbers)`);
+      } catch (err) {
+        spinnerFile.fail(`❌ Failed to read CSV: ${err.message}`);
+        process.exit(1);
+      }
     }
 
-    if (options.file) {
-      const csvNumbers = await readNumbers(options.file);
-      numbers.push(...csvNumbers);
-    }
     numbers = numbers
-      .map((num) => num.replace(/\D/g, "")) 
-      .filter((num) => num.length >= 8); 
+      .map((num) => (num ? String(num).replace(/\D/g, "") : ""))
+      .filter((num) => num.length >= 8);
+
     if (numbers.length === 0) {
-      console.error(chalk.red("❌ No valid numbers provided"));
+      log.error("❌ No valid numbers provided");
       process.exit(1);
     }
 
-    console.log(
-      chalk.blue(`ℹ️ Adding ${numbers.length} numbers to group ${groupId}`)
-    );
-
+    log.info(`ℹ️ Adding ${numbers.length} numbers to group...`);
+    const spinnerAdd = ora("Adding participants...").start();
     await manager.addParticipants(groupId, numbers, {
       delayMs: Number(options.delay),
       chunkSize: Number(options.chunk),
     });
+    spinnerAdd.succeed("✅ All participants processed");
 
-    console.log(chalk.green("✅ All done!"));
+    log.success("🎉 WaMate CLI finished successfully!");
+    process.exit(0);
   } catch (err) {
-    console.error(chalk.red("❌ Error during processing:"), err);
+    log.error("❌ Error during processing:", err);
+    process.exit(1);
   }
 })();

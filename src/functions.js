@@ -15,7 +15,7 @@ export async function readNumbers(file) {
   return new Promise((resolve, reject) => {
     fs.createReadStream(file)
       .pipe(csv())
-      .on("data", (row) => numbers.push(row.number))
+      .on("data", (row) => numbers.push(row.numbers))
       .on("end", () => resolve(numbers))
       .on("error", (err) => reject(err));
   });

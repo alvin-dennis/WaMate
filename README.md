@@ -67,26 +67,26 @@ wamate -g <groupIdOrInvite> -n <number1> <number2> ... -f <path/to/file.csv> -d 
 | `-c, --chunk <size>`         | Number of participants to add at a time (default: `5`)              |
 
 > [!NOTE]
-> The CSV file should have a column named number with phone numbers.
+> The CSV file should have a column named "numbers" with phone numbers.
 
 ### Examples
 
 - Add a single number via CLI:
 
 ```bash
-npm link
+wamate -g <groupIdOrInvite> -n  971500000001
 ```
 
 - Add multiple numbers via CLI:
 
 ```bash
-npm link
+wamate -g <groupIdOrInvite> -n  1836243775 18732562552 9846541885
 ```
 
 - Add numbers from a CSV file:
 
 ```bash
-npm link
+wamate -g <groupIdOrInvite> -f numbers.csv 
 ```
 
 ---
