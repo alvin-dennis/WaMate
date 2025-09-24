@@ -1,6 +1,6 @@
 # Wamate
 
-**Wamate** is a Node.js CLI tool to add participants to WhatsApp groups automatically using [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js). It can add numbers directly or send invite links if direct addition fails. Numbers can be provided via command-line arguments or a CSV file.
+**Wamate** is a Node.js CLI tool to add participants to WhatsApp groups automatically using [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js). It can add numbers directly or send group invite links if direct addition fails. Numbers can be provided via command-line arguments or a CSV file.
 
 ---
 
@@ -92,7 +92,7 @@ This will launch step-by-step prompts for groupID or Invite code, numbers, file,
 
 | Option                       | Description                                                         |
 | ---------------------------- | ------------------------------------------------------------------- |
-| `-g, --group <idOrInvite>`   | WhatsApp group ID or invite code (required)                         |
+| `-g, --group <idOrInvite>`   | WhatsApp group ID or code from the group invite link (required)                         |
 | `-n, --numbers <numbers...>` | List of phone numbers to add (optional)                             |
 | `-f, --file <path>`          | CSV file containing numbers (optional)                              |
 | `-d, --delay <ms>`           | Delay in milliseconds between adding participants (default: `2000`) |
