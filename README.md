@@ -19,7 +19,7 @@
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/alvin-dennis/wamate.git
+git clone https://github.com/alvin-dennis/WaMate.git
 cd wamate
 ```
 
@@ -33,6 +33,12 @@ bun install
 
 ```bash
 npm link
+```
+
+1. Run the CLI:
+
+```bash
+wamate
 ```
 
 ---
@@ -54,9 +60,21 @@ npm link
 
 ### Usage
 
+You can run WaMate in two ways:
+
+1. CLI mode (provide all required options in one command):
+
 ```bash
 wamate -g <groupIdOrInvite> -n <number1> <number2> ... -f <path/to/file.csv> -d <delayMs> -c <chunkSize>
 ```
+
+2. Interactive mode (default):
+
+```bash
+wamate
+```
+
+This will launch step-by-step prompts for groupID or Invite code, numbers, file, delay, and chunk size.
 
 | Option                       | Description                                                         |
 | ---------------------------- | ------------------------------------------------------------------- |
@@ -70,6 +88,8 @@ wamate -g <groupIdOrInvite> -n <number1> <number2> ... -f <path/to/file.csv> -d 
 > The CSV file should have a column named "numbers" with phone numbers.
 
 ### Examples
+
+#### Using CLI
 
 - Add a single number via CLI:
 
@@ -87,6 +107,32 @@ wamate -g <groupIdOrInvite> -n  1836243775 18732562552 9846541885
 
 ```bash
 wamate -g <groupIdOrInvite> -f numbers.csv 
+```
+
+#### Using Interactive mode (enabled by default)
+
+- Interactive mode (manual numbers):
+
+```json
+wamate
+? Enter WhatsApp group ID or invite: 1234567890@g.us
+? How do you want to add participants? Enter numbers manually
+? Enter numbers (space-separated): 919876543210 917654321098
+? Enter delay in ms between chunks (default 2000): 2000
+? Enter chunk size (default 5): 5
+
+```
+
+- Interactive mode (CSV file):
+
+```json
+wamate
+? Enter WhatsApp group ID or invite: 1234567890@g.us
+? How do you want to add participants? Upload from CSV file
+? Enter CSV file path: ./members.csv
+? Enter delay in ms between chunks (default 2000): 2000
+? Enter chunk size (default 5): 5
+
 ```
 
 ---

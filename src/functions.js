@@ -3,8 +3,8 @@ const { Client, LocalAuth } = pkg;
 import fs from "fs";
 import csv from "csv-parser";
 import { createObjectCsvWriter } from "csv-writer";
-import chalk from "chalk";
 import qr from "qrcode-terminal";
+import { log } from "./logger.js";
 
 export function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -32,17 +32,17 @@ export class WamateManager {
   async init() {
     return new Promise((resolve, reject) => {
       this.client.on("qr", (qrCode) => {
-        console.log(chalk.yellow("📲 Scan this QR with WhatsApp:"));
+        log.info("📲 Scan this QR with WhatsApp:");
         qr.generate(qrCode, { small: true });
       });
 
       this.client.on("ready", () => {
-        console.log(chalk.green("✅ WhatsApp client ready!"));
+        log.success("✅ WhatsApp client ready!");
         resolve();
       });
 
       this.client.on("auth_failure", (msg) => {
-        console.error(chalk.red("❌ Auth failed:", msg));
+        log.error("❌ Auth failed:", msg);
         reject(new Error("Auth failed"));
       });
 
@@ -68,10 +68,10 @@ export class WamateManager {
 
         try {
           await group.addParticipants([contactId]);
-          console.log(chalk.green(`✅ Added ${number}`));
+          log.success(`✅ Added ${number}`);
           results.push({ number, status: "added" });
         } catch (err) {
-          console.log(chalk.red(`❌ Could not add ${number}: ${err.message}`));
+          log.error(`❌ Could not add ${number}: ${err.message}`);
 
           try {
             const invite = await group.getInviteCode();
@@ -79,13 +79,11 @@ export class WamateManager {
               contactId,
               `Join our WhatsApp group: https://chat.whatsapp.com/${invite}`
             );
-            console.log(chalk.blue(`🔗 Invite link sent to ${number}`));
+            log.info(`🔗 Invite link sent to ${number}`);
             results.push({ number, status: "invite sent" });
           } catch (inviteErr) {
-            console.error(
-              chalk.red(
-                `❌ Failed to send invite to ${number}: ${inviteErr.message}`
-              )
+            log.error(
+              `❌ Failed to send invite to ${number}: ${inviteErr.message}`
             );
             results.push({ number, status: "failed" });
           }
@@ -94,9 +92,7 @@ export class WamateManager {
         await delay(delayMs);
       }
 
-      console.log(
-        chalk.magenta(`Chunk processed: ${i + 1}-${i + chunk.length}`)
-      );
+      log.info(`📦 Chunk processed: ${i + 1}-${i + chunk.length}`);
       await delay(delayMs * 2);
     }
 
@@ -122,6 +118,6 @@ export class WamateManager {
     });
 
     await csvWriter.writeRecords(results);
-    console.log(chalk.green(`✅ Results logged to results.csv`));
+    log.success(`✅ Results logged to results.csv`);
   }
 }

@@ -3,18 +3,18 @@
 import { WamateManager, readNumbers } from "../src/functions.js";
 import { Command } from "commander";
 import ora from "ora";
-import chalk from "chalk";
 import { renderTitle } from "../src/title.js";
 import { log } from "../src/logger.js";
 import { input, select } from "@inquirer/prompts";
+import chalk from "chalk";
 
 const program = new Command();
 
 function renderBanner() {
   renderTitle();
-  console.log(chalk.gray("──────────────────────────────────────────"));
-  console.log(chalk.cyan("✨ WhatsApp Bulk Adder CLI"));
-  console.log(chalk.gray("──────────────────────────────────────────\n"));
+  log.info("──────────────────────────────────────────");
+  log.info(chalk.cyan("✨ WhatsApp Bulk Adder CLI"));
+  log.info("──────────────────────────────────────────\n");
 }
 
 program
@@ -25,12 +25,8 @@ program
   )
   .option("-n, --numbers <numbers...>", "List of phone numbers")
   .option("-f, --file <path>", "CSV file with numbers")
-  .option("-d, --delay <ms>", "Delay between adds (default: 2000)", 2000)
-  .option(
-    "-c, --chunk <size>",
-    "Chunk size for adding participants (default: 5)",
-    5
-  )
+  .option("-d, --delay <ms>", "Delay between adds", 2000)
+  .option("-c, --chunk <size>", "Chunk size for adding participants", 5)
   .showHelpAfterError(true);
 
 program.configureOutput({
@@ -44,6 +40,7 @@ program.configureOutput({
 
 async function askInteractive() {
   renderBanner();
+  log.info("📖 Interactive mode enabled...\n");
 
   const group = await input({
     message: "Enter WhatsApp Group ID or Invite Code:",
@@ -99,60 +96,48 @@ async function askInteractive() {
     }
 
     renderBanner();
-    console.log(chalk.cyan("🚀 Launching WaMate CLI...\n"));
+    log.info("🚀 Launching WaMate CLI...\n");
 
     const manager = new WamateManager("default");
     await manager.init();
 
     let groupId = options.group;
     if (!groupId.endsWith("@g.us")) {
-      const spinner = ora(
-        chalk.yellow(`Resolving invite code: ${groupId}`)
-      ).start();
+      const spinner = ora(`Resolving invite code: ${groupId}`).start();
       try {
         const info = await manager.client.getInviteInfo(groupId);
         groupId = info.id._serialized;
-        spinner.succeed(
-          chalk.green(`✅ Found group: ${info.subject} (${groupId})`)
-        );
+        spinner.succeed(`✅ Found group: ${info.subject} (${groupId})`);
       } catch {
-        spinner.fail(
-          chalk.red("❌ Invalid invite code or unable to fetch group info")
-        );
+        spinner.fail("❌ Invalid invite code or unable to fetch group info");
         process.exit(1);
       }
     }
 
-    const spinnerGroup = ora(
-      chalk.yellow(`Fetching group info: ${groupId}`)
-    ).start();
+    const spinnerGroup = ora(`Fetching group info: ${groupId}`).start();
     let group;
     try {
       group = await manager.client.getChatById(groupId);
-      spinnerGroup.succeed(chalk.green(`✅ Group loaded: ${group.name}`));
+      spinnerGroup.succeed(`✅ Group loaded: ${group.name}`);
     } catch {
-      spinnerGroup.fail(chalk.red(`❌ Cannot find group: ${groupId}`));
+      spinnerGroup.fail(`❌ Cannot find group: ${groupId}`);
       process.exit(1);
     }
 
-    console.log(chalk.cyan("\n📋 Preparing numbers..."));
+    log.info("\n📋 Preparing numbers...");
     let numbers = [];
 
     if (options.numbers && options.numbers.length > 0)
       numbers.push(...options.numbers);
 
     if (options.file) {
-      const spinnerFile = ora(
-        chalk.yellow(`Reading CSV file: ${options.file}`)
-      ).start();
+      const spinnerFile = ora(`Reading CSV file: ${options.file}`).start();
       try {
         const csvNumbers = await readNumbers(options.file);
         numbers.push(...csvNumbers);
-        spinnerFile.succeed(
-          chalk.green(`✅ CSV loaded (${csvNumbers.length} numbers)`)
-        );
+        spinnerFile.succeed(`✅ CSV loaded (${csvNumbers.length} numbers)`);
       } catch (err) {
-        spinnerFile.fail(chalk.red(`❌ Failed to read CSV: ${err.message}`));
+        spinnerFile.fail(`❌ Failed to read CSV: ${err.message}`);
         process.exit(1);
       }
     }
@@ -162,42 +147,32 @@ async function askInteractive() {
       .filter((num) => num.length >= 8);
 
     if (numbers.length === 0) {
-      log.error(chalk.red("❌ No valid numbers provided"));
+      log.error("❌ No valid numbers provided");
       process.exit(1);
     }
 
-    console.log(
-      chalk.cyan(`\nℹ️ Total numbers to add: ${chalk.bold(numbers.length)}`)
-    );
+    log.info(`\nℹ️ Total numbers to add: ${numbers.length}`);
 
-    const spinnerAdd = ora(chalk.yellow("Adding participants...")).start();
+    const spinnerAdd = ora("Adding participants...").start();
     await manager.addParticipants(groupId, numbers, {
       delayMs: Number(options.delay),
       chunkSize: Number(options.chunk),
     });
-    spinnerAdd.succeed(chalk.green("✅ All participants processed"));
+    spinnerAdd.succeed("✅ All participants processed");
 
-    console.log(chalk.bold.cyan("\n🎉 WaMate CLI finished successfully!"));
-    console.log(chalk.gray("──────────────────────────────────────────"));
-    log.info(`${chalk.green("✔")} Group: ${chalk.bold(group.name)}`);
-    log.info(
-      `${chalk.green("✔")} Added: ${chalk.bold(numbers.length)} participants`
-    );
-    log.info(
-      `${chalk.green("✔")} Delay: ${options.delay}ms | Chunk size: ${
-        options.chunk
-      }`
-    );
-    console.log(chalk.gray("──────────────────────────────────────────\n"));
-     console.log(
-       chalk.greenBright("👋 Thank you for using WaMate! See you next time.\n")
-     );
+    log.info("\n🎉 WaMate CLI finished successfully!");
+    log.info("──────────────────────────────────────────");
+    log.success(`✔ Group: ${group.name}`);
+    log.success(`✔ Added: ${numbers.length} participants`);
+    log.success(`✔ Delay: ${options.delay}ms | Chunk size: ${options.chunk}`);
+    log.info("──────────────────────────────────────────\n");
+
+    log.info("👋 Thank you for using WaMate! See you next time.\n");
     process.exit(0);
   } catch (err) {
     renderBanner();
-    console.log(
-      chalk.greenBright("👋 Thank you for using WaMate! See you next time.\n")
-    );
+    log.error("❌ Error during processing:", err);
+    log.info("👋 Thank you for using WaMate! See you next time.\n");
     process.exit(1);
   }
 })();
