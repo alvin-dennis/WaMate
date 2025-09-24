@@ -51,25 +51,11 @@ export class BulkAddManager {
   }
 
   async addParticipants(
-    groupIdOrInvite,
+    groupId,
     numbers,
     options = { delayMs: 2000, chunkSize: 5 }
   ) {
-    let groupId = groupIdOrInvite;
-    let groupName = null;
-
-    if (!groupId.endsWith("@g.us")) {
-      try {
-        const info = await this.client.getInviteInfo(groupId);
-        groupId = info.id._serialized;
-        groupName = info.subject;
-        log.success(`✅ Resolved group: ${groupName} (${groupId})`);
-      } catch (err) {
-        log.error(`❌ Failed to resolve invite: ${err.message}`);
-        return;
-      }
-    }
-
+    const group = await this.client.getChatById(groupId);
     const results = [];
     const delayMs = options.delayMs || 2000;
     const chunkSize = options.chunkSize || 5;
@@ -81,14 +67,14 @@ export class BulkAddManager {
         const contactId = number.includes("@c.us") ? number : `${number}@c.us`;
 
         try {
-          await this.client.addParticipants(groupId, [contactId]);
+          await group.addParticipants([contactId]);
           log.success(`✅ Added ${number}`);
           results.push({ number, status: "added" });
         } catch (err) {
           log.error(`❌ Could not add ${number}: ${err.message}`);
 
           try {
-            const invite = await this.client.getInviteCode(groupId);
+            const invite = await group.getInviteCode();
             await this.client.sendMessage(
               contactId,
               `Join our WhatsApp group: https://chat.whatsapp.com/${invite}`
@@ -113,13 +99,13 @@ export class BulkAddManager {
     await this.logResults(results);
   }
 
-  async addParticipantsFromCSV(groupIdOrInvite, csvFile, options) {
+  async addParticipantsFromCSV(groupId, csvFile, options) {
     const numbers = await readNumbers(csvFile);
-    await this.addParticipants(groupIdOrInvite, numbers, options);
+    await this.addParticipants(groupId, numbers, options);
   }
 
-  async addParticipantsFromArray(numbers, groupIdOrInvite, options) {
-    await this.addParticipants(groupIdOrInvite, numbers, options);
+  async addParticipantsFromArray(numbers, groupId, options) {
+    await this.addParticipants(groupId, numbers, options);
   }
 
   async logResults(results) {
