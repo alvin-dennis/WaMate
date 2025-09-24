@@ -107,21 +107,11 @@ async function askInteractive() {
       try {
         const info = await manager.client.getInviteInfo(groupId);
         groupId = info.id._serialized;
-        spinner.succeed(`✅ Found group: ${info.subject} (${groupId})`);
+        spinner.succeed(`✅ Resolved group: ${info.subject} (${groupId})`);
       } catch {
-        spinner.fail("❌ Invalid invite code or unable to fetch group info");
+        spinner.fail("❌ Invalid invite code or unable to resolve");
         process.exit(1);
       }
-    }
-
-    const spinnerGroup = ora(`Fetching group info: ${groupId}`).start();
-    let group;
-    try {
-      group = await manager.client.getChatById(groupId);
-      spinnerGroup.succeed(`✅ Group loaded: ${group.name}`);
-    } catch {
-      spinnerGroup.fail(`❌ Cannot find group: ${groupId}`);
-      process.exit(1);
     }
 
     log.info("\n📋 Preparing numbers...");
@@ -162,9 +152,9 @@ async function askInteractive() {
 
     log.info("\n🎉 WaMate CLI finished successfully!");
     log.info("──────────────────────────────────────────");
-    log.success(`✔ Group: ${group.name}`);
-    log.success(`✔ Added: ${numbers.length} participants`);
-    log.success(`✔ Delay: ${options.delay}ms | Chunk size: ${options.chunk}`);
+    log.success(`✔ Group ID: ${groupId}`);
+    log.success(`✔ Total participants: ${numbers.length}`);
+    log.success(`✔ Delay: ${options.delay}ms | Chunk: ${options.chunk}`);
     log.info("──────────────────────────────────────────\n");
 
     log.info("👋 Thank you for using WaMate! See you next time.\n");
