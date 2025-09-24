@@ -2,6 +2,7 @@
   "name": "wamate",
   "module": "bin/cli.js",
   "type": "module",
+  "version": "0.1.3",
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -12,7 +13,7 @@
     "start": "node bin/cli.js"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^4.9.5"
   },
   "dependencies": {
     "@inquirer/prompts": "^7.8.6",
