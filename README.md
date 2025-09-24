@@ -45,6 +45,20 @@ wamate
 
 ## For using WaMate
 
+### Installation
+
+Using npm:
+
+```bash
+npm i -g wamate
+```
+
+Using bun:
+
+```bash
+bun i -g wamate
+```
+
 ### Authentication
 
 1. On the first run, Wamate will display a QR code in the terminal.
