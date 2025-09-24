@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { WamateManager, readNumbers } from "../src/functions.js";
+import { BulkAddManager, readNumbers } from "../src/commands/bulkadd.js";
 import { Command } from "commander";
 import ora from "ora";
 import { renderTitle } from "../src/title.js";
@@ -98,7 +98,7 @@ async function askInteractive() {
     renderBanner();
     log.info("🚀 Launching WaMate CLI...\n");
 
-    const manager = new WamateManager("default");
+    const manager = new BulkAddManager("default");
     await manager.init();
 
     let groupId = options.group;

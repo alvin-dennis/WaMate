@@ -4,7 +4,7 @@ import fs from "fs";
 import csv from "csv-parser";
 import { createObjectCsvWriter } from "csv-writer";
 import qr from "qrcode-terminal";
-import { log } from "./logger.js";
+import { log } from "../logger.js";
 
 export function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -21,7 +21,7 @@ export async function readNumbers(file) {
   });
 }
 
-export class WamateManager {
+export class BulkAddManager {
   constructor(clientId = "default") {
     this.client = new Client({
       authStrategy: new LocalAuth({ clientId }),
