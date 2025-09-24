@@ -9,15 +9,14 @@
     "wamate": "bin/cli.js"
   },
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/cli.js"
+    "start": "node bin/cli.js"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
+    "@inquirer/prompts": "^7.8.6",
     "chalk": "^5.6.2",
-    "cli-table3": "^0.6.5",
     "commander": "^14.0.1",
     "csv-parser": "^3.2.0",
     "csv-writer": "^1.6.0",
